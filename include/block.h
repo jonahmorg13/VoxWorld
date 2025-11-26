@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+#include <string>
+#include <unordered_map>
 #include "rendering.h"
 #include "texture.h"
 
@@ -18,6 +20,20 @@ enum BLOCK
     SAND_BLOCK = 8,
     OAK_WOOD = 9,
     OAK_LEAVES = 10
+};
+
+static std::unordered_map<BLOCK, std::string> blockNames = {
+    {BLOCK::AIR_BLOCK, "Air"},
+    {BLOCK::GRASS_BLOCK, "Grass"},
+    {BLOCK::DIRT_BLOCK, "Dirt"},
+    {BLOCK::STONE_BLOCK, "Stone"},
+    {BLOCK::FOCUS, "Focus"},
+    {BLOCK::BEDROCK_BLOCK, "Bedrock"},
+    {BLOCK::SNOW_BLOCK, "Snow"},
+    {BLOCK::WATER_BLOCK, "Water"},
+    {BLOCK::SAND_BLOCK, "Sand"},
+    {BLOCK::OAK_WOOD, "Oak Wood"},
+    {BLOCK::OAK_LEAVES, "Oak Leaves"}
 };
 
 typedef struct

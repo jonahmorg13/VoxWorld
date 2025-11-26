@@ -123,6 +123,61 @@ void World::removeBlock(glm::ivec3 blockPos)
     }
 }
 
+//TODO refactor this code to for chunk mesh queue and chunk pos calculating
+void World::createBlock(glm::ivec3 blockPos, BLOCK block) {
+    int chunk_x = blockPos.x / CHUNK_SIZE;
+    int chunk_z = blockPos.z / CHUNK_SIZE;
+
+    int block_x = blockPos.x % CHUNK_SIZE;
+    int block_y = blockPos.y;
+    int block_z = blockPos.z % CHUNK_SIZE;
+
+    if (block_x < 0)
+    {
+        block_x += CHUNK_SIZE;
+        chunk_x -= 1;
+    }
+
+    if (block_y < 0)
+    {
+        block_y += CHUNK_SIZE;
+    }
+
+    if (block_z < 0)
+    {
+        block_z += CHUNK_SIZE;
+        chunk_z -= 1;
+    }
+
+    ChunkPos chunkPos = {chunk_x,
+                         chunk_z};
+
+    std::vector<char> &data = getChunkDataIfExists(chunkPos);
+    if (data.size() > 0)
+    {
+        data[block_x + (block_y * CHUNK_SIZE) + (block_z * CHUNK_SIZE * CHUNK_HEIGHT)] = block;
+
+        std::unique_lock<std::mutex> queue_lock(mesh_queue_mtx);
+        chunksToMeshQueue.push_front(chunkPos);
+        if (block_z <= 0)
+        {
+            chunksToMeshQueue.push_front({chunkPos.x, chunkPos.z - 1});
+        }
+        if (block_z >= CHUNK_SIZE - 1)
+        {
+            chunksToMeshQueue.push_front({chunkPos.x, chunkPos.z + 1});
+        }
+        if (block_x <= 0)
+        {
+            chunksToMeshQueue.push_front({chunkPos.x - 1, chunkPos.z});
+        }
+        if (block_x >= CHUNK_SIZE - 1)
+        {
+            chunksToMeshQueue.push_front({chunkPos.x + 1, chunkPos.z});
+        }
+    }
+}
+
 void World::startWorldGeneration()
 {
     // Locking current position initially to avoid races

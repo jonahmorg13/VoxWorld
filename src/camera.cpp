@@ -2,6 +2,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <algorithm>
 
 #include "camera.h"
 #include "physics.h"
@@ -152,7 +153,11 @@ void Camera::tick(float currentTime)
     // Always apply gravity to the vertical velocity
     if (physics)
     {
-        velocity.y += gravity * (float)deltaTime;
+        auto gravityCalc = velocity.y + gravity * (float)deltaTime;
+        //std::cout << "gravity calc: " << gravityCalc << std::endl;
+
+        velocity.y = gravityCalc;
+        velocity.y = std::clamp(velocity.y, -20.0f, 100.0f);
     }
 
     float rayDist = 0.3f;

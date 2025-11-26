@@ -24,6 +24,7 @@ public:
     void render();
     BLOCK getBlockData(glm::ivec3 blockPos);
     void removeBlock(glm::ivec3 blockPos);
+    void createBlock(glm::ivec3 blockPos, BLOCK block);
     void updateFocusBlock(glm::ivec3 &pos, char &face);
     bool intialDataGenerated;
     ChunkPos worldCurrPos;

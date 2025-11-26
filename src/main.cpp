@@ -33,9 +33,15 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
+//TODO: build more logging throughout the system so it doesn't take forever to load
+//TODO: determine why it's taking forever for my blocks to load
+//TODO: make it so you can scroll and pick a currently selected block
 int screenWidth = 1280, screenHeight = 720;
 World *world = new World();
 Player *player = new Player(world);
+
+BLOCK allowedBlocks[] = {BLOCK::DIRT_BLOCK, BLOCK::OAK_WOOD, BLOCK::OAK_LEAVES, BLOCK::STONE_BLOCK, BLOCK::SAND_BLOCK};
+int currBlockIdx = 0;
 
 void error_callback(int error, const char *description)
 {
@@ -117,6 +123,42 @@ void playerHitBlock(BLOCK block, glm::ivec3 &pos, char &face)
     world->removeBlock(pos);
 }
 
+void placeBlock(BLOCK block, glm::ivec3 &pos, char &face)
+{
+    glm::ivec3 newPos = pos;
+    switch(face) {
+        //north face
+        case 1:
+            newPos.z -= 1;
+            break;
+        //south face
+        case 2:
+            newPos.z += 1;
+            break;
+        //west face
+        case 4:
+            newPos.x -= 1;
+            break;
+        //east face
+        case 8:
+            newPos.x += 1;
+            break;
+        //bottom face
+        case 16:
+            newPos.y -= 1;
+            break;
+        //top face
+        case 32:
+            newPos.y += 1;
+            break;
+        default:
+            newPos = pos;
+            break;
+    }
+    std::cout << "Creating a block at: " << newPos.x << ", " << newPos.y << ", " << newPos.z << std::endl;
+    world->createBlock(newPos, allowedBlocks[currBlockIdx]);
+}
+
 void focusBlock(BLOCK block, glm::ivec3 &pos, char &face)
 {
     world->updateFocusBlock(pos, face);
@@ -124,10 +166,26 @@ void focusBlock(BLOCK block, glm::ivec3 &pos, char &face)
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-    {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         RayCastInfo info = {*world, player->getPos(), player->getFront(), 5.0f, playerHitBlock};
         shoot_ray(info);
+    }
+    else if(button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
+        RayCastInfo info = {*world, player->getPos(), player->getFront(), 5.0f, placeBlock};
+        shoot_ray(info);
+    }
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
+    auto allowedBlocksSize = std::size(allowedBlocks);
+
+    if(yoffset > 0) {
+        //scrolling up
+        currBlockIdx = (currBlockIdx + 1 >= allowedBlocksSize) ? 0 : currBlockIdx + 1;
+    }
+    else if (yoffset < 0) {
+        //scrolling down
+        currBlockIdx = (currBlockIdx - 1 < 0) ? allowedBlocksSize - 1 : currBlockIdx - 1;
     }
 }
 
@@ -153,6 +211,7 @@ int main(void)
 
     glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetScrollCallback(window, scroll_callback);
     // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
@@ -209,9 +268,12 @@ int main(void)
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         // Create an ImGui window for displaying the FPS
-        ImGui::SetNextWindowSize(ImVec2(350.0f, 200.0f));
+        ImGui::SetNextWindowSize(ImVec2(400.0f, 200.0f));
         ImGui::Begin("Voxworld Alpha 0.0.1");
         ImGui::Text("FPS: %.1f", fps); // Display the FPS
+        auto playerPos = player->getPos();
+        ImGui::Text("Pos: (%.2f, %.2f, %.2f)", playerPos.x, playerPos.y, playerPos.z);
+        ImGui::Text("Currently Selected Block: %s", blockNames[allowedBlocks[currBlockIdx]].c_str());
         ImGui::End();
 
         if (!world->intialDataGenerated)
@@ -269,8 +331,6 @@ int main(void)
         // Calculate FPS
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> elapsed = currentTime - startTime;
-
-        glm::vec3 playerPos = player->getPos();
 
         if (elapsed.count() >= 1.0f)
         {
