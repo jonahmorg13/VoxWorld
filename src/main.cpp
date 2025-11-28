@@ -34,8 +34,13 @@
 #include "imgui_impl_opengl3.h"
 
 //TODO: build more logging throughout the system so it doesn't take forever to load
-//TODO: determine why it's taking forever for my blocks to load
-//TODO: make it so you can scroll and pick a currently selected block
+//TODO: fix random crashing..??
+//TODO: learn how the shader code is working (probably have to re learn some linear algebra)
+//TODO: add gui for inventory bar
+//TODO: add initial world data and mesh generation before starting the game
+//TODO: fix random chunks clipping at the corners
+//TODO: make it so you can't place blocks within yourself
+//TODO: the ray casting system still sucks?
 int screenWidth = 1280, screenHeight = 720;
 World *world = new World();
 Player *player = new Player(world);
