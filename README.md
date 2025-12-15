@@ -28,8 +28,8 @@ https://github.com/user-attachments/assets/b9c1d8b9-3c5b-4ab3-b6a7-041fbac6231b
 ![voxwrld_a0 0 1](https://github.com/user-attachments/assets/22810576-e423-4894-93fe-85bbcda90403)
 <img width="1444" height="825" alt="image" src="https://github.com/user-attachments/assets/d143de30-6a65-4678-8926-feee08e81c77" />
 
-Book I used to help me get through this project:
-- [OpenGL Docs](https://docs.gl/)
+Resource I used to learn OpenGL:
+- https://learnopengl.com/Introduction
 
 ## Libraries Used
 - glad
